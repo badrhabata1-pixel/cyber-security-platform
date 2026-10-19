@@ -2,7 +2,10 @@ from datetime import datetime, timezone
 from fastapi import HTTPException, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
-from config import settings
+try:
+    from p3_detection.config import settings
+except ImportError:
+    from config import settings
 
 security = HTTPBearer(auto_error=False)
 
