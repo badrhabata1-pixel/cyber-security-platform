@@ -2,7 +2,10 @@ import os
 import yaml
 from datetime import datetime, timezone
 from typing import List, Dict, Any
-from database import get_db
+try:
+    from p3_detection.database import get_db
+except ImportError:
+    from database import get_db
 
 RULES_FILE = os.path.join(os.path.dirname(__file__), "rules.yaml")
 
