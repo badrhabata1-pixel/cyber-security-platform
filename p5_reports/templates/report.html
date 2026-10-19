@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Executive Security Report {{ report.reference }}</title>
+<meta name="author" content="Unified SOC - Reporting Engine (P5)">
+<meta name="subject" content="Security posture for {{ period_label }}">
+{% macro severity_cell(level, colors) %}<td class="marker" style="border-left: 3pt solid {{ colors.get(level, '#a8a69f') }};">{{ (level or 'unknown') | capitalize }}</td>{% endmacro %}
+{% macro unavailable_box(key) %}
+{% set info = unavailable[key] %}
+<div class="unavailable">
+  <p class="unavailable-title">Data for this section is currently unavailable</p>
+  <p class="unavailable-text">{{ info.reason }} Source: {{ info.title }} ({{ info.service }}). Every other section of this report is complete.</p>
+</div>
+{% endmacro %}
+{% macro section_heading(key, title, intro) %}
+<p class="kicker">Section {{ numbers[key] }}</p>
+<h1>{{ title }}</h1>
+<p class="intro">{{ intro }}</p>
+{% endmacro %}
+<style>
+@font-face { font-family: Body; src: url("font:regular"); }
+@font-face { font-family: Body; src: url("font:bold"); font-weight: bold; }
+@page { size: a4 portrait; margin: 0; background-image: url("{{ cover }}"); }
+@page content {
+  size: a4 portrait; margin: 2.3cm 1.8cm 2cm 1.8cm;
+  @frame header { -pdf-frame-content: page-header; left: 1.8cm; right: 1.8cm; top: 0.9cm; height: 0.9cm; }
+  @frame footer { -pdf-frame-content: page-footer; left: 1.8cm; right: 1.8cm; bottom: 0.7cm; height: 0.8cm; }
+}
+body { font-family: Body; font-size: 8.5pt; color: #0b0b0b; line-height: 1.45; }
+p { margin: 0 0 6pt 0; }
+h1 { font-size: 19pt; color: #0d366b; margin: 0 0 4pt 0; line-height: 1.15; }
+h2 { font-size: 10.5pt; color: #0b0b0b; margin: 14pt 0 6pt 0; }
+table { width: 100%; }
+td, th { vertical-align: top; }
+.kicker { font-size: 7pt; color: #2a78d6; font-weight: bold; margin: 0 0 2pt 0; }
+.intro { color: #52514e; font-size: 8.5pt; margin: 0 0 12pt 0; padding-bottom: 8pt; border-bottom: 0.75pt solid #e1e0d9; }
+.muted { color: #898781; }
+.secondary { color: #52514e; }
+.small { font-size: 7pt; }
+.section { page-break-before: always; }
+
+/* Cover */
+.cover-top { padding: 2.6cm 2cm 0 2cm; height: 11.4cm; }
+.cover-brand { font-size: 8pt; color: #b7d3f6; font-weight: bold; margin-bottom: 1.6cm; }
+.cover-title { font-size: 34pt; color: #ffffff; font-weight: bold; line-height: 1.1; margin-bottom: 10pt; }
+.cover-period { font-size: 13pt; color: #cde2fb; margin-bottom: 1.3cm; }
+.cover-posture td { padding: 7pt 10pt; color: #ffffff; font-size: 9pt; }
+.cover-bottom { padding: 3.7cm 2cm 0 2cm; }
+.meta td { padding: 6pt 0; border-bottom: 0.5pt solid #e1e0d9; font-size: 8.5pt; }
+.meta td.label { color: #898781; width: 32%; }
+.sources td { padding: 4pt 0; font-size: 8pt; }
+.confidential { margin-top: 1cm; font-size: 7pt; color: #898781; }
+
+/* Running header and footer */
+.running td { font-size: 7pt; color: #898781; }
+
+/* Tiles, banners, callouts */
+.tiles td.tile { background-color: #f6f6f3; padding: 9pt 10pt 8pt 10pt; border-left: 2.5pt solid #2a78d6; }
+.tile-label { font-size: 7pt; color: #52514e; margin: 0 0 3pt 0; }
+.tile-value { font-size: 17pt; font-weight: bold; color: #0b0b0b; margin: 0 0 2pt 0; line-height: 1.1; }
+.tile-text { font-size: 8.5pt; font-weight: bold; color: #0b0b0b; margin: 0 0 2pt 0; line-height: 1.2; }
+.tile-sub { font-size: 7pt; color: #898781; margin: 0; }
+.posture td { padding: 9pt 12pt; }
+.posture-label { font-size: 12pt; font-weight: bold; margin: 0 0 2pt 0; }
+.unavailable { background-color: #f6f6f3; border: 0.75pt solid #e1e0d9; border-left: 3pt solid #898781; padding: 12pt 14pt; margin: 4pt 0 10pt 0; }
+.unavailable-title { font-size: 10pt; font-weight: bold; color: #0b0b0b; margin: 0 0 3pt 0; }
+.unavailable-text { color: #52514e; margin: 0; }
+.empty { color: #52514e; background-color: #f6f6f3; padding: 10pt 12pt; margin: 4pt 0 10pt 0; }
+.note { color: #52514e; font-size: 7.5pt; margin-top: 4pt; }
+ul { margin: 0 0 0 12pt; padding: 0; }
+li { margin-bottom: 4pt; }
+
+/* Data tables */
+.data th { font-size: 6.8pt; color: #898781; font-weight: bold; text-align: left; padding: 0 6pt 5pt 6pt; border-bottom: 0.75pt solid #c3c2b7; }
+.data td { padding: 4pt 6pt; border-bottom: 0.5pt solid #e1e0d9; font-size: 7.8pt; }
+.data td.marker { padding-left: 6pt; }
+.data .num, .data th.num { text-align: right; }
+.data.compact td { padding: 2.5pt 6pt; }
+.reason { font-size: 7.2pt; color: #52514e; margin: 0 0 1pt 0; }
+.chart-title { font-size: 8.5pt; font-weight: bold; margin: 0 0 1pt 0; }
+.chart-sub { font-size: 7pt; color: #898781; margin: 0 0 6pt 0; }
+.meter-track { background-color: #cde2fb; }
+.meter-fill { background-color: #2a78d6; }
+.rec td { padding: 6pt 8pt; border-bottom: 0.5pt solid #e1e0d9; }
+.rec-title { font-size: 8.8pt; font-weight: bold; margin: 0 0 2pt 0; }
+.rec-action { margin: 0 0 3pt 0; }
+.rec-evidence { font-size: 7.2pt; color: #898781; margin: 0; }
+</style>
+</head>
+<body>
+
+{# ---------------------------------------------------------------- Running header / footer (content pages only) #}
+<div id="page-header">
+  <table class="running"><tr>
+    <td>Unified SOC &middot; Executive Security Report</td>
+    <td style="text-align: right;">{{ report.reference }} &middot; Confidential</td>
+  </tr></table>
+</div>
+<div id="page-footer">
+  <table class="running"><tr>
+    <td style="width: 80%;">Period {{ period_label }} &middot; Generated {{ generated_label }}</td>
+    <td style="text-align: right; width: 20%;">Page <pdf:pagenumber/> of <pdf:pagecount/></td>
+  </tr></table>
+</div>
+
+{# ---------------------------------------------------------------- Cover #}
+<div class="cover-top">
+  <p class="cover-brand">UNIFIED SOC &nbsp;&middot;&nbsp; SECURITY OPERATIONS CENTER</p>
+  <p class="cover-title">Executive Security<br>Report</p>
+  <p class="cover-period">{{ period_label }}</p>
+  <table class="cover-posture" style="width: 62%;"><tr>
+    <td style="background-color: {{ status_colors[posture.key] if posture.key != 'low' else status_colors.good }}; width: 6pt; padding: 0;"></td>
+    <td style="background-color: #184f95;">Overall threat level: <b>{{ posture.label }}</b></td>
+  </tr></table>
+</div>
+<div class="cover-bottom">
+  <table class="meta">
+    <tr><td class="label">Reference</td><td><b>{{ report.reference }}</b></td></tr>
+    <tr><td class="label">Reporting period</td><td>{{ period_label }} (UTC)</td></tr>
+    <tr><td class="label">Requested by</td><td>{{ report.requested_by }}</td></tr>
+    <tr><td class="label">Generated</td><td>{{ generated_label }}</td></tr>
+    <tr><td class="label">Data sources</td><td>
+      <table class="sources">
+      {% for source in sources %}
+        <tr><td style="width: 4%;"><span style="color: {{ status_colors.good if source.available else status_colors.critical }};">&#9632;</span></td>
+            <td>{{ source.title }} <span class="muted">({{ source.service }})</span> &mdash; {{ "Available" if source.available else "Unavailable" }}</td></tr>
+      {% endfor %}
+      </table>
+    </td></tr>
+  </table>
+  <p class="confidential">CONFIDENTIAL &mdash; prepared for the organisation's leadership and security team. Do not distribute outside authorised personnel.</p>
+</div>
+
+<pdf:nexttemplate name="content"/>
+
+{# ---------------------------------------------------------------- 1. Executive summary #}
+{% if "summary" in wanted %}
+<div class="section">
+{{ section_heading("summary", "Executive summary", "The security posture for the period at a glance: the overall threat level, the numbers that matter and what they mean.") }}
+
+<table class="posture"><tr>
+  <td style="width: 5pt; padding: 0; background-color: {{ status_colors[posture.key] if posture.key != 'low' else status_colors.good }};"></td>
+  <td style="background-color: #f6f6f3;">
+    <p class="posture-label">Overall threat level: {{ posture.label }}</p>
+    <p class="secondary" style="margin: 0;">{{ posture.reason }}{% if unavailable %} Assessed on the data sources that were available.{% endif %}</p>
+  </td>
+</tr></table>
+
+<table class="tiles" style="margin-top: 10pt;"><tr>
+  <td class="tile" style="border-left-color: {{ status_colors.critical }}; width: 24%;">
+    <p class="tile-label">{{ "Critical alerts" if alerts and not alerts.details else "Unresolved critical alerts" }}</p>
+    {% if alerts %}<p class="tile-value">{{ alerts.open_by_severity.critical }}</p><p class="tile-sub">{{ alerts.open_by_severity.high }} high severity also unresolved</p>
+    {% else %}<p class="tile-value muted">n/a</p><p class="tile-sub">Alert data unavailable</p>{% endif %}
+  </td>
+  <td style="width: 1.3%;"></td>
+  <td class="tile" style="width: 24%;">
+    <p class="tile-label">Intrusion attempts</p>
+    {% if logs %}<p class="tile-value">{{ logs.failed | num }}</p><p class="tile-sub">Failed logins, {{ logs.failure_rate }}% of {{ logs.total | num }} events</p>
+    {% else %}<p class="tile-value muted">n/a</p><p class="tile-sub">Log data unavailable</p>{% endif %}
+  </td>
+  <td style="width: 1.3%;"></td>
+  <td class="tile" style="width: 24%;">
+    <p class="tile-label">Alerts raised</p>
+    {% if alerts %}<p class="tile-value">{{ alerts.total }}</p><p class="tile-sub">{{ alerts.open }} awaiting resolution</p>
+    {% else %}<p class="tile-value muted">n/a</p><p class="tile-sub">Alert data unavailable</p>{% endif %}
+  </td>
+  <td style="width: 1.3%;"></td>
+  <td class="tile" style="width: 24%;{% if domains and domains.riskiest %} border-left-color: {{ status_colors.get(domains.riskiest.level, '#a8a69f') }};{% endif %}">
+    <p class="tile-label">Riskiest domain scanned</p>
+    {% if domains and domains.riskiest %}<p class="tile-text">{{ domains.riskiest.domain | truncate(22, true, "…", 0) }}</p><p class="tile-sub">Risk {{ domains.riskiest.score }}/100 &middot; {{ domains.riskiest.level | capitalize }}</p>
+    {% elif domains %}<p class="tile-text">None</p><p class="tile-sub">No risky domain in this period</p>
+    {% else %}<p class="tile-value muted">n/a</p><p class="tile-sub">Domain data unavailable</p>{% endif %}
+  </td>
+</tr></table>
+
+<h2>Summary</h2>
+{% for sentence in narrative %}<p>{{ sentence }}</p>{% endfor %}
+
+{% if findings %}
+<h2>Key findings</h2>
+<ul>{% for finding in findings %}<li>{{ finding }}</li>{% endfor %}</ul>
+{% endif %}
+
+{% if "recommendations" in wanted and recommendations %}
+<h2>Top priorities</h2>
+<table class="data">
+  <tr><th style="width: 16%;">Priority</th><th>Action</th></tr>
+  {% for rec in recommendations[:3] %}
+  <tr>{{ severity_cell(rec.priority, priority_colors) }}<td><b>{{ rec.title }}.</b> <span class="secondary">See section {{ numbers.recommendations }} for details.</span></td></tr>
+  {% endfor %}
+</table>
+{% endif %}
+</div>
+{% endif %}
+
+{# ---------------------------------------------------------------- Log intelligence #}
+{% if "logs" in wanted %}
+<div class="section">
+{{ section_heading("logs", "Log intelligence", "Authentication and web activity collected by the SIEM: how much traffic was seen, how much of it was hostile, and where it came from.") }}
+{% if not logs %}{{ unavailable_box("logs") }}
+{% elif not logs.total %}<p class="empty">No log events were recorded in this period.</p>
+{% else %}
+<table class="tiles"><tr>
+  <td class="tile" style="width: 32%;"><p class="tile-label">Events processed</p><p class="tile-value">{{ logs.total | num }}</p><p class="tile-sub">SSH, web and platform logins</p></td>
+  <td style="width: 2%;"></td>
+  <td class="tile" style="width: 32%; border-left-color: {{ status_colors.high }};">
+    <p class="tile-label">Failed logins</p><p class="tile-value">{{ logs.failed | num }}</p>
+    <table style="margin: 3pt 0 3pt 0;"><tr>
+      {% if logs.failure_rate > 0 %}<td class="meter-fill" style="width: {{ [logs.failure_rate, 100] | min }}%; font-size: 3pt;">&nbsp;</td>{% endif %}
+      {% if logs.failure_rate < 100 %}<td class="meter-track" style="font-size: 3pt;">&nbsp;</td>{% endif %}
+    </tr></table>
+    <p class="tile-sub">{{ logs.failure_rate }}% of all events</p>
+  </td>
+  <td style="width: 2%;"></td>
+  <td class="tile" style="width: 32%;"><p class="tile-label">Peak hour (UTC)</p>
+    {% if logs.peak_hour is not none %}<p class="tile-value">{{ "%02d:00" | format(logs.peak_hour) }}</p><p class="tile-sub">{{ logs.by_hour[logs.peak_hour] | num }} events in that hour</p>
+    {% else %}<p class="tile-value muted">n/a</p><p class="tile-sub">No hourly breakdown</p>{% endif %}
+  </td>
+</tr></table>
+
+<table style="margin-top: 14pt;"><tr>
+  <td style="width: 48%;">
+    <p class="chart-title">Most active attacking IPs</p><p class="chart-sub">Failed logins per source address</p>
+    {% if charts.top_ips %}<img src="{{ charts.top_ips.src }}" width="{{ charts.top_ips.width }}" height="{{ charts.top_ips.height }}">{% else %}<p class="empty">No failed logins.</p>{% endif %}
+  </td>
+  <td style="width: 4%;"></td>
+  <td style="width: 48%;">
+    <p class="chart-title">Origin countries</p><p class="chart-sub">Failed logins per country (GeoIP)</p>
+    {% if charts.top_countries %}<img src="{{ charts.top_countries.src }}" width="{{ charts.top_countries.width }}" height="{{ charts.top_countries.height }}">{% else %}<p class="empty">No location data.</p>{% endif %}
+  </td>
+</tr></table>
+
+{% if charts.by_hour %}
+<p class="chart-title" style="margin-top: 12pt;">Activity by hour of day (UTC)</p><p class="chart-sub">All log events in the period, grouped by hour</p>
+<img src="{{ charts.by_hour.src }}" width="{{ charts.by_hour.width }}" height="{{ charts.by_hour.height }}">
+{% endif %}
+
+{% if logs.top_users %}
+<h2>Most targeted accounts</h2>
+<table class="data" repeat="1">
+  <tr><th style="width: 50%;">Username</th><th class="num" style="width: 25%;">Failed logins</th><th class="num" style="width: 25%;">Share of failures</th></tr>
+  {% for user, count in logs.top_users[:6] %}
+  <tr><td>{{ user }}</td><td class="num">{{ count | num }}</td><td class="num">{{ (count / logs.failed * 100) | round | int if logs.failed else 0 }}%</td></tr>
+  {% endfor %}
+</table>
+{% endif %}
+{% endif %}
+</div>
+{% endif %}
+
+{# ---------------------------------------------------------------- Intrusion alerts #}
+{% if "alerts" in wanted %}
+<div class="section">
+{{ section_heading("alerts", "Intrusion alerts", "Attacks recognised by the detection rules. Repeated attacks from the same source are merged into one alert, so the event count shows their scale.") }}
+{% if not alerts %}{{ unavailable_box("alerts") }}
+{% elif not alerts.total %}<p class="empty">No alerts were raised in this period. Detection rules were active and found no matching activity.</p>
+{% else %}
+<table><tr>
+  <td style="width: 48%;">
+    <p class="chart-title">Alerts by severity</p><p class="chart-sub">All alerts raised in the period</p>
+    {% if charts.severity %}<img src="{{ charts.severity.src }}" width="{{ charts.severity.width }}" height="{{ charts.severity.height }}">{% endif %}
+  </td>
+  <td style="width: 4%;"></td>
+  <td style="width: 48%;">
+    <p class="chart-title">Response status</p><p class="chart-sub">Where each alert stands in the analyst workflow</p>
+    <table class="tiles"><tr>
+      {% for status in ["open", "acknowledged", "resolved"] %}
+      <td class="tile" style="width: 32%; padding: 6pt 7pt; border-left-color: {{ '#2a78d6' if status != 'resolved' else '#a8a69f' }};"><p class="tile-label">{{ status | capitalize }}</p><p class="tile-value" style="font-size: 13pt;">{{ alerts.by_status[status] }}</p></td>
+      {% if not loop.last %}<td style="width: 2%;"></td>{% endif %}
+      {% endfor %}
+    </tr></table>
+    <p class="chart-title" style="margin-top: 10pt;">Detection rules triggered</p>
+    <table class="data compact">
+      <tr><th>Rule</th><th class="num">Alerts</th></tr>
+      {% for name, _key, count in alerts.by_rule %}<tr><td>{{ name }}</td><td class="num">{{ count }}</td></tr>{% endfor %}
+    </table>
+  </td>
+</tr></table>
+
+<h2>Unresolved alerts by priority</h2>
+{% if not alerts.details %}
+<p class="empty">The alert list could not be retrieved, so only the counts above (from the alert summary) are shown.</p>
+{% elif not alerts.rows %}
+<p class="empty">Every alert raised in this period has been resolved.</p>
+{% else %}
+<table class="data" repeat="1">
+  <tr><th style="width: 10%;">Severity</th><th style="width: 18%;">Rule</th><th style="width: 15%;">Source IP</th><th class="num" style="width: 7%;">Events</th><th style="width: 24%;">Description</th><th style="width: 13%;">Detected (UTC)</th><th style="width: 13%;">Status</th></tr>
+  {% for row in alerts.rows[:12] %}
+  <tr>{{ severity_cell(row.severity, status_colors) }}<td>{{ row.rule }}</td><td>{{ row.ip }}</td><td class="num">{{ row.count | num }}</td><td>{{ row.description }}</td>
+      <td>{{ row.created_short }}</td><td>{{ (row.status or '') | capitalize }}</td></tr>
+  {% endfor %}
+</table>
+{% if alerts.rows | length > 12 %}<p class="note">{{ alerts.rows | length - 12 }} more unresolved alerts are listed in the Intrusion Detection dashboard.</p>{% endif %}
+{% endif %}
+{% endif %}
+</div>
+{% endif %}
+
+{# ---------------------------------------------------------------- Domain threat intelligence #}
+{% if "domains" in wanted %}
+<div class="section">
+{{ section_heading("domains", "Domain threat intelligence", "Domains and links checked for phishing and malware indicators: registration age, DNS and e-mail security, TLS certificate, reputation feeds and URL patterns, combined into a 0-100 risk score.") }}
+{% if not domains %}{{ unavailable_box("domains") }}
+{% elif not domains.total %}<p class="empty">No domains were scanned in this period.</p>
+{% else %}
+<table class="tiles"><tr>
+  {% for level in ["critical", "high", "medium", "low"] %}
+  <td class="tile" style="width: 23.5%; border-left-color: {{ status_colors[level] }};"><p class="tile-label">{{ level | capitalize }} risk</p><p class="tile-value">{{ domains.by_level[level] }}</p><p class="tile-sub">domain{{ "" if domains.by_level[level] == 1 else "s" }}</p></td>
+  {% if not loop.last %}<td style="width: 2%;"></td>{% endif %}
+  {% endfor %}
+</tr></table>
+
+{% if charts.domains %}
+<p class="chart-title" style="margin-top: 14pt;">Risk score by domain</p><p class="chart-sub">Highest risk first; 75+ is critical, 50+ high, 25+ medium</p>
+<img src="{{ charts.domains.src }}" width="{{ charts.domains.width }}" height="{{ charts.domains.height }}">
+{% endif %}
+
+<h2>Scan results</h2>
+<table class="data" repeat="1">
+  <tr><th style="width: 24%;">Domain</th><th class="num" style="width: 8%;">Score</th><th style="width: 11%;">Level</th><th class="num" style="width: 9%;">Age (days)</th><th class="num" style="width: 9%;">Engines flagging</th><th style="width: 39%;">Main reasons</th></tr>
+  {% for row in domains.rows %}
+  <tr><td><b>{{ row.domain }}</b><br><span class="muted small">Scanned {{ row.scanned_at }}</span></td>
+      <td class="num">{{ row.score }}</td>{{ severity_cell(row.level, status_colors) }}
+      <td class="num">{{ row.age_days | num if row.age_days is not none else "n/a" }}</td>
+      <td class="num">{{ row.detections if row.detections is not none else "n/a" }}</td>
+      <td>{% for reason in row.reasons %}<p class="reason">{{ reason }}</p>{% else %}<p class="reason">No issues found</p>{% endfor %}</td></tr>
+  {% endfor %}
+</table>
+{% endif %}
+</div>
+{% endif %}
+
+{# ---------------------------------------------------------------- Recommendations #}
+{% if "recommendations" in wanted %}
+<div class="section">
+{{ section_heading("recommendations", "Recommended actions", "Concrete remediation steps derived from this period's findings, ordered by urgency. Immediate items should be completed today.") }}
+<table class="rec" repeat="1">
+  {% for rec in recommendations %}
+  <tr>
+    <td style="width: 14%; border-left: 3pt solid {{ priority_colors[rec.priority] }};"><b>{{ rec.priority }}</b></td>
+    <td><p class="rec-title">{{ rec.title }}</p><p class="rec-action">{{ rec.action }}</p><p class="rec-evidence">Why: {{ rec.evidence }}</p></td>
+  </tr>
+  {% endfor %}
+</table>
+{% if unavailable %}<p class="note">Some data sources were unavailable, so these recommendations may be incomplete. Re-run the report once all services are reachable.</p>{% endif %}
+</div>
+{% endif %}
+
+{# ---------------------------------------------------------------- About #}
+<div class="section">
+<p class="kicker">Appendix</p>
+<h1>About this report</h1>
+<p class="intro">How the figures were produced, so they can be verified and reproduced.</p>
+<table class="data">
+  <tr><th style="width: 30%;">Data source</th><th style="width: 30%;">Service</th><th>Status at generation time</th></tr>
+  {% for source in sources %}
+  <tr><td>{{ source.title }}</td><td>{{ source.service }}</td>{{ severity_cell("Available" if source.available else "Unavailable", {"Available": status_colors.good, "Unavailable": status_colors.critical}) }}</tr>
+  {% endfor %}
+</table>
+<h2>Definitions</h2>
+<table class="data">
+  <tr><td style="width: 22%;"><b>Alert severity</b></td><td>Critical: an attack likely succeeded. High: an active attack in progress. Medium: suspicious behaviour that needs review. Low: unusual but probably benign activity.</td></tr>
+  <tr><td><b>Domain risk score</b></td><td>0-100, combining threat-intelligence feeds (VirusTotal, Google Safe Browsing), registration age, TLS certificate, SPF/DMARC e-mail protection and phishing URL patterns. 75+ critical, 50+ high, 25+ medium.</td></tr>
+  <tr><td><b>Failed logins</b></td><td>Failed password attempts and attempts against usernames that do not exist (SSH and platform logins).</td></tr>
+  <tr><td><b>Threat level</b></td><td>Critical when an unresolved critical alert or a critical-risk domain exists; High for unresolved high-severity activity; Elevated when only suspicious activity was seen.</td></tr>
+</table>
+<p class="note">All times are UTC. Generated automatically by the Unified SOC reporting engine (P5) from data held by the detection, log analysis and domain intelligence services.</p>
+</div>
+
+</body>
+</html>
