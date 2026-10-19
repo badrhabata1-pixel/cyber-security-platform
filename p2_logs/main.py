@@ -153,7 +153,7 @@ def summary() -> dict:
 def stats_geo() -> dict:
     conn = connection()
     try:
-        rows = conn.execute("SELECT ip,country,city,COUNT(*) AS count FROM events WHERE ip IS NOT NULL GROUP BY ip,country,city ORDER BY count DESC").fetchall()
+        rows = conn.execute("SELECT ip,country,city,source,event_type,COUNT(*) AS count FROM events WHERE ip IS NOT NULL AND event_type IN ('login_failed','login_success','invalid_user') GROUP BY ip,country,city,source,event_type ORDER BY count DESC").fetchall()
     finally:
         conn.close()
     locations = []
