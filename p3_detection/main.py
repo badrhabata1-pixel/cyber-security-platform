@@ -1,6 +1,5 @@
 import json
 import asyncio
-from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import List, Optional
 from fastapi import FastAPI, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect, status
@@ -12,6 +11,21 @@ from p3_detection.database import get_db, save_or_dedup_alert
 from p3_detection.engine import load_rules_config
 from p3_detection.models import AlertContract, AlertStatusUpdate
 from p3_detection.clients.logs_client import start_polling_worker
+
+app = FastAPI(
+    title="P3 - Intrusion Detection & Smart Alerts",
+    version="1.0.0",
+    docs_url="/docs"
+)
+
+# السماح للاتصال من الـ Frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # --- إدارة اتصالات الـ WebSocket للبث اللحظي ---
 class ConnectionManager:
@@ -34,37 +48,19 @@ class ConnectionManager:
                 pass
 
 manager = ConnectionManager()
+worker_task = None
 
-# تشغيل عملية السحب التلقائي في الخلفية مع بدء السيرفر
-@asynccontextmanager
-# تشغيل عملية السحب التلقائي في الخلفية مع بدء السيرفر
-@asynccontextmanager
-async def lifespan(app: FastAPI):
+# تشغيل الـ Worker في الخلفية بطريقة متوافقة 100%
+@app.on_event("startup")
+async def startup_event():
+    global worker_task
     worker_task = asyncio.create_task(start_polling_worker(manager.broadcast))
-    try:
-        yield
-    finally:
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    global worker_task
+    if worker_task:
         worker_task.cancel()
-        try:
-            await worker_task
-        except asyncio.CancelledError:
-            pass
-
-app = FastAPI(
-    title="P3 - Intrusion Detection & Smart Alerts",
-    version="1.0.0",
-    docs_url="/docs",
-    lifespan=lifespan
-)
-
-# السماح للاتصال من الـ Frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # --- 1. فحص صحة الخدمة Health Check ---
 @app.get("/health", tags=["System"])
@@ -176,7 +172,6 @@ async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     try:
         while True:
-            # إبقاء الاتصال حياً
             await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(websocket)
