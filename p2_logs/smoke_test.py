@@ -4,6 +4,7 @@ import tempfile
 from pathlib import Path
 
 os.environ["AUTH_DISABLED"] = "true"
+previous_directory = os.getcwd()
 with tempfile.TemporaryDirectory() as directory:
     os.chdir(directory)
     import sys
@@ -21,4 +22,5 @@ with tempfile.TemporaryDirectory() as directory:
     assert result == {"accepted": 3, "created": 2, "unparsed": 1}, result
     stats = main.summary()
     assert stats["total_events"] == 2 and stats["failed_logins"] == 1, stats
+    os.chdir(previous_directory)
 print("smoke test: ok")

@@ -125,15 +125,21 @@ def events(
     if to: clauses.append("timestamp <= ?"); params.append(to)
     if ip: clauses.append("ip = ?"); params.append(ip)
     where = f" WHERE {' AND '.join(clauses)}" if clauses else ""
-    with connection() as conn:
+    conn = connection()
+    try:
         rows = conn.execute(f"SELECT * FROM events{where} ORDER BY id ASC LIMIT ?", (*params, limit)).fetchall()
+    finally:
+        conn.close()
     return {"events": [dict(row) for row in rows]}
 
 
 @app.get("/stats/summary", dependencies=[Depends(require_reader)])
 def summary() -> dict:
-    with connection() as conn:
+    conn = connection()
+    try:
         rows = conn.execute("SELECT timestamp, ip, username, country, event_type, status FROM events").fetchall()
+    finally:
+        conn.close()
     total = len(rows)
     # The reporting contract calls this failed_logins: HTTP failures are not login failures.
     failures = [r for r in rows if r["event_type"] in {"login_failed", "invalid_user"}]
@@ -145,8 +151,11 @@ def summary() -> dict:
 
 @app.get("/stats/geo", dependencies=[Depends(require_reader)])
 def stats_geo() -> dict:
-    with connection() as conn:
+    conn = connection()
+    try:
         rows = conn.execute("SELECT ip,country,city,COUNT(*) AS count FROM events WHERE ip IS NOT NULL GROUP BY ip,country,city ORDER BY count DESC").fetchall()
+    finally:
+        conn.close()
     locations = []
     for row in rows:
         point = dict(row)
