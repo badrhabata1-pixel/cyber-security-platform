@@ -5,7 +5,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>body{font-family:system-ui;margin:24px;background:#0e1621;color:#e7eef7}main{max-width:1200px;margin:auto}.cards{display:flex;gap:16px;flex-wrap:wrap}.card,section{background:#172435;padding:16px;border-radius:8px;margin:16px 0}.card{min-width:160px}table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:8px;text-align:left;border-bottom:1px solid #30445c}input{padding:8px;margin:8px 6px 8px 0}canvas{max-height:280px}#map{height:360px;background:#111827}</style>
+  <style>body{font-family:system-ui;margin:24px;background:#0e1621;color:#e7eef7}main{max-width:1200px;margin:auto}.cards{display:flex;gap:16px;flex-wrap:wrap}.card,section{background:#172435;padding:16px;border-radius:8px;margin:16px 0}.card{min-width:160px}table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:8px;text-align:left;border-bottom:1px solid #30445c}input{padding:8px;margin:8px 6px 8px 0}canvas{max-height:280px}#map{height:360px;background:#111827}.leaflet-tile-pane{filter:grayscale(100%) invert(100%) hue-rotate(180deg) brightness(80%) contrast(90%)}</style>
 </head><body><main>
   <h1>Log Analysis / SIEM</h1>
   <div class="cards"><div class="card">Total events<br><strong id="total">–</strong></div><div class="card">Failed logins<br><strong id="failed">–</strong></div></div>
@@ -14,7 +14,7 @@
   <section><input id="ip" placeholder="Filter IP"><button onclick="loadEvents()">Filter</button><table><thead><tr><th>Time (UTC)</th><th>Source</th><th>IP</th><th>User</th><th>Event</th><th>Location</th></tr></thead><tbody id="rows"></tbody></table></section>
 </main><script>
 const map=L.map('map').setView([20,0],2);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',subdomains:'abcd',maxZoom:20}).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);
 async function api(url){return (await fetch(url)).json()}
 async function loadEvents(){const ip=document.getElementById('ip').value,data=await api('/events?limit=100'+(ip?'&ip='+encodeURIComponent(ip):''));document.getElementById('rows').innerHTML=data.events.map(e=>`<tr><td>${e.timestamp}</td><td>${e.source}</td><td>${e.ip||''}</td><td>${e.username||''}</td><td>${e.event_type}</td><td>${[e.city,e.country].filter(Boolean).join(', ')}</td></tr>`).join('')}
 async function init(){const summary=await api('/stats/summary'),geo=await api('/stats/geo');document.getElementById('total').textContent=summary.total_events;document.getElementById('failed').textContent=summary.failed_logins;new Chart(document.getElementById('chart'),{type:'bar',data:{labels:summary.top_ips.map(x=>x.value),datasets:[{label:'Failed logins by IP',data:summary.top_ips.map(x=>x.count)}]}});geo.locations.filter(x=>x.latitude!=null).forEach(x=>L.circleMarker([x.latitude,x.longitude],{radius:Math.max(5,Math.sqrt(x.count)*4),color:'#50e3c2',fillColor:'#0ea5e9',fillOpacity:.8}).addTo(map).bindPopup(`<b>${x.source||'login'}</b> · ${x.event_type||''}<br>${x.ip}: ${x.count} events<br>${x.city||''} ${x.country||''}`));loadEvents()}
