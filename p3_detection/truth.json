@@ -1,1 +1,40 @@
-
+{
+  "attacks": [
+    {
+      "rule": "brute_force",
+      "target_ip": "198.51.100.10",
+      "expected_severity": "high",
+      "details": "6 failed login attempts in 30 seconds"
+    },
+    {
+      "rule": "password_spraying",
+      "target_ip": "198.51.100.20",
+      "expected_severity": "high",
+      "details": "Targeted 6 different users from same IP in 2 minutes"
+    },
+    {
+      "rule": "success_after_failures",
+      "target_ip": "198.51.100.30",
+      "expected_severity": "critical",
+      "details": "5 failed logins followed by a successful login"
+    },
+    {
+      "rule": "web_scan",
+      "target_ip": "198.51.100.40",
+      "expected_severity": "medium",
+      "details": "25 404 responses in 40 seconds"
+    },
+    {
+      "rule": "injection_attempt",
+      "target_ip": "198.51.100.50",
+      "expected_severity": "high",
+      "details": "SQL injection UNION SELECT inside path"
+    },
+    {
+      "rule": "off_hours_login",
+      "target_ip": "198.51.100.60",
+      "expected_severity": "low",
+      "details": "Login success at 03:00 UTC"
+    }
+  ]
+}
