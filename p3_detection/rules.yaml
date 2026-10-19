@@ -1,1 +1,49 @@
+rules:
+  brute_force:
+    enabled: true
+    severity: high
+    threshold: 5
+    window_seconds: 60
+    description: "Multiple failed logins from the same IP"
 
+  password_spraying:
+    enabled: true
+    severity: high
+    threshold: 5
+    window_seconds: 300
+    description: "Password spraying attempt targeting multiple usernames"
+
+  success_after_failures:
+    enabled: true
+    severity: critical
+    threshold_failures: 5
+    window_seconds: 300
+    description: "Successful login immediately following multiple failed attempts"
+
+  new_country:
+    enabled: true
+    severity: medium
+    description: "Login from a previously unseen country for this user"
+
+  off_hours_login:
+    enabled: true
+    severity: low
+    start_hour: 1
+    end_hour: 5
+    description: "Successful login during off-hours window (01:00 - 05:00 UTC)"
+
+  web_scan:
+    enabled: true
+    severity: medium
+    threshold: 20
+    window_seconds: 60
+    description: "Excessive 404 HTTP responses indicating a web scan/fuzzing"
+
+  injection_attempt:
+    enabled: true
+    severity: high
+    patterns:
+      - "UNION SELECT"
+      - "../"
+      - "<script>"
+    description: "Suspicious injection signature detected in HTTP path"
