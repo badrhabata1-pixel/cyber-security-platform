@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-10-19T13:02:59Z",
+  "expected": {
+    "events": 213,
+    "unparsed": 1,
+    "failed_logins": 33
+  },
+  "attacks": [
+    {
+      "type": "brute_force",
+      "ip": "203.0.113.5",
+      "events": 30
+    },
+    {
+      "type": "password_spraying",
+      "username": "finance",
+      "ips": [
+        "198.51.100.22",
+        "203.0.113.77",
+        "192.0.2.222"
+      ],
+      "events": 3
+    }
+  ]
+}
