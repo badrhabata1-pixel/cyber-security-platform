@@ -37,10 +37,18 @@ manager = ConnectionManager()
 
 # تشغيل عملية السحب التلقائي في الخلفية مع بدء السيرفر
 @asynccontextmanager
+# تشغيل عملية السحب التلقائي في الخلفية مع بدء السيرفر
+@asynccontextmanager
 async def lifespan(app: FastAPI):
     worker_task = asyncio.create_task(start_polling_worker(manager.broadcast))
-    yield
-    worker_task.cancel()
+    try:
+        yield
+    finally:
+        worker_task.cancel()
+        try:
+            await worker_task
+        except asyncio.CancelledError:
+            pass
 
 app = FastAPI(
     title="P3 - Intrusion Detection & Smart Alerts",
