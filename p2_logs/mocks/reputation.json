@@ -1,0 +1,4 @@
+{
+  "203.0.113.5": {"score": 90, "label": "simulated-malicious"},
+  "198.51.100.22": {"score": 75, "label": "simulated-suspicious"}
+}
