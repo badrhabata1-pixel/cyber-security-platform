@@ -10,7 +10,7 @@ def alerts(date_from: str | None = None, date_to: str | None = None, token: str 
     data = fetch(BASE_URL, "/alerts", "alerts.json", {"from": date_from, "to": date_to}, token)
     if data is None:
         return None
-    # The response wrapper is not in contracts/ yet: accept a bare list or {"alerts": [...]}
+    # P3 returns a bare list; {"alerts": [...]} is accepted too in case that changes
     return data if isinstance(data, list) else data.get("alerts", [])
 
 

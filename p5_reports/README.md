@@ -61,12 +61,12 @@ Set `USE_MOCKS=false` to use the real services. Their URLs come from `DOMAIN_SER
 
 ### What P5 expects from each service (please confirm)
 
-The mocks match the real responses where they exist. P1's scan objects are exactly P1's `POST /scan` result, and P2's summary is exactly P2's `/stats/summary`. These parts are not built yet, so they are proposals:
+The mocks match the real responses where they exist. P1's scan objects are exactly P1's `POST /scan` result, and P2's summary is exactly P2's `/stats/summary`. P3's alert endpoints are checked against the merged P3 service. P1's `GET /scans` is not built yet, so its shape is a proposal:
 
 * **P1, `GET /scans`**: `{"scans": [<the POST /scan result>, ...]}`, filtered by `from`/`to` on `scanned_at`. A bare list also works.
 * **P2, `GET /stats/summary`**: please honour `from`/`to`. Today it returns all-time figures. Lists from P1 and P3 are re-filtered by P5, but this summary cannot be.
-* **P3, `GET /alerts`**: `{"alerts": [<Alert contract>, ...]}` filtered on `created_at`. A bare list also works.
-* **P3, `GET /alerts/summary`**: `{"total", "by_severity": {...}, "by_rule": {...}, "by_status": {...}}`, as in `mocks/alerts_summary.json`. P5 uses it only when `/alerts` is unavailable: counts are otherwise computed from the alert list, so the chart and the table always agree.
+* **P3, `GET /alerts`** (built): a bare list of Alert contract objects, filtered by `from`/`to` on `created_at`. Verified against the merged P3 service.
+* **P3, `GET /alerts/summary`** (built): `{"total_alerts", "by_severity", "by_rule", "by_status"}`. It ignores `from`/`to`, so P5 uses it only when `/alerts` is unavailable. Otherwise counts are computed from the alert list, so the chart and the table always agree.
 * **P4, `JWT_SECRET`**: at least 32 characters. PyJWT warns about shorter HS256 keys.
 
 ## UI and the P4 shell

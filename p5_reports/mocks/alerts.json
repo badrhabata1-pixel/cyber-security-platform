@@ -1,14 +1,12 @@
-{
-  "alerts": [
-    {"id": 101, "created_at": "2026-10-16T02:14:05Z", "rule": "brute_force", "severity": "high", "ip": "203.0.113.5", "count": 168, "description": "168 failed logins in 60s windows", "event_ids": [1031, 1032, 1033, 1034, 1035], "status": "open"},
-    {"id": 102, "created_at": "2026-10-16T02:31:40Z", "rule": "success_after_failures", "severity": "critical", "ip": "203.0.113.5", "count": 1, "description": "login_success for root after 168 failed attempts", "event_ids": [1204], "status": "open"},
-    {"id": 103, "created_at": "2026-10-16T09:02:11Z", "rule": "password_spraying", "severity": "high", "ip": "198.51.100.22", "count": 74, "description": "11 different usernames tried in 5 minutes", "event_ids": [1350, 1351, 1352, 1353, 1354], "status": "acknowledged"},
-    {"id": 104, "created_at": "2026-10-17T13:45:00Z", "rule": "injection_attempt", "severity": "high", "ip": "203.0.113.77", "count": 9, "description": "http_path contains UNION SELECT", "event_ids": [1502, 1503], "status": "open"},
-    {"id": 105, "created_at": "2026-10-17T13:47:30Z", "rule": "web_scan", "severity": "medium", "ip": "203.0.113.77", "count": 64, "description": "64 HTTP 404 responses in 60s", "event_ids": [1510, 1511, 1512], "status": "open"},
-    {"id": 106, "created_at": "2026-10-17T22:10:00Z", "rule": "new_country", "severity": "medium", "ip": "192.0.2.222", "count": 1, "description": "finance logged in from NL for the first time", "event_ids": [1588], "status": "acknowledged"},
-    {"id": 107, "created_at": "2026-10-18T03:22:18Z", "rule": "off_hours_login", "severity": "low", "ip": "198.51.100.140", "count": 1, "description": "deploy logged in at 03:22 UTC", "event_ids": [1640], "status": "resolved"},
-    {"id": 108, "created_at": "2026-10-18T11:05:52Z", "rule": "injection_attempt", "severity": "high", "ip": "192.0.2.61", "count": 3, "description": "http_path contains ../", "event_ids": [1702, 1703, 1704], "status": "resolved"},
-    {"id": 109, "created_at": "2026-10-18T19:40:03Z", "rule": "brute_force", "severity": "high", "ip": "203.0.113.19", "count": 18, "description": "18 failed logins in 60s", "event_ids": [1790, 1791, 1792], "status": "open"},
-    {"id": 110, "created_at": "2026-10-19T01:12:44Z", "rule": "success_after_failures", "severity": "critical", "ip": "198.51.100.22", "count": 1, "description": "login_success for finance after 9 failed attempts", "event_ids": [1833], "status": "open"}
-  ]
-}
+[
+  {"id": 101, "created_at": "2026-10-16T02:14:05Z", "rule": "brute_force", "severity": "high", "ip": "203.0.113.5", "count": 168, "description": "168 failed logins in 60s windows", "event_ids": [1031, 1032, 1033, 1034, 1035], "status": "open"},
+  {"id": 102, "created_at": "2026-10-16T02:31:40Z", "rule": "success_after_failures", "severity": "critical", "ip": "203.0.113.5", "count": 1, "description": "login_success for root after 168 failed attempts", "event_ids": [1204], "status": "open"},
+  {"id": 103, "created_at": "2026-10-16T09:02:11Z", "rule": "password_spraying", "severity": "high", "ip": "198.51.100.22", "count": 74, "description": "11 different usernames tried in 5 minutes", "event_ids": [1350, 1351, 1352, 1353, 1354], "status": "acknowledged"},
+  {"id": 104, "created_at": "2026-10-17T13:45:00Z", "rule": "injection_attempt", "severity": "high", "ip": "203.0.113.77", "count": 9, "description": "http_path contains UNION SELECT", "event_ids": [1502, 1503], "status": "open"},
+  {"id": 105, "created_at": "2026-10-17T13:47:30Z", "rule": "web_scan", "severity": "medium", "ip": "203.0.113.77", "count": 64, "description": "64 HTTP 404 responses in 60s", "event_ids": [1510, 1511, 1512], "status": "open"},
+  {"id": 106, "created_at": "2026-10-17T22:10:00Z", "rule": "new_country", "severity": "medium", "ip": "192.0.2.222", "count": 1, "description": "finance logged in from NL for the first time", "event_ids": [1588], "status": "acknowledged"},
+  {"id": 107, "created_at": "2026-10-18T03:22:18Z", "rule": "off_hours_login", "severity": "low", "ip": "198.51.100.140", "count": 1, "description": "deploy logged in at 03:22 UTC", "event_ids": [1640], "status": "resolved"},
+  {"id": 108, "created_at": "2026-10-18T11:05:52Z", "rule": "injection_attempt", "severity": "high", "ip": "192.0.2.61", "count": 3, "description": "http_path contains ../", "event_ids": [1702, 1703, 1704], "status": "resolved"},
+  {"id": 109, "created_at": "2026-10-18T19:40:03Z", "rule": "brute_force", "severity": "high", "ip": "203.0.113.19", "count": 18, "description": "18 failed logins in 60s", "event_ids": [1790, 1791, 1792], "status": "open"},
+  {"id": 110, "created_at": "2026-10-19T01:12:44Z", "rule": "success_after_failures", "severity": "critical", "ip": "198.51.100.22", "count": 1, "description": "login_success for finance after 9 failed attempts", "event_ids": [1833], "status": "open"}
+]

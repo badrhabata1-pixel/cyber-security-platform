@@ -47,7 +47,7 @@ def test_mocks_follow_the_contracts_and_agree_with_each_other(monkeypatch):
     assert {s["risk_level"] for s in scans} == {"critical", "high", "medium", "low"}
     assert stats["failed_logins"] == sum(i["count"] for i in stats["top_ips"])
     assert stats["total_events"] == sum(h["count"] for h in stats["by_hour"]) and len(stats["by_hour"]) == 24
-    assert alerts_summary["total"] == len(alerts) == sum(alerts_summary["by_severity"].values())
+    assert alerts_summary["total_alerts"] == len(alerts) == sum(alerts_summary["by_severity"].values())
     assert all(a["severity"] in report_data.SEVERITIES and a["status"] in report_data.ALERT_STATUSES for a in alerts)
 
 
@@ -95,7 +95,7 @@ def test_one_service_down_only_blanks_its_own_section(client, monkeypatch):
 
 def test_alert_summary_alone_still_fills_the_alert_counts(client, monkeypatch):
     monkeypatch.setattr(detection_client, "fetch", lambda base_url, path, *rest: None if path == "/alerts" else
-                        {"total": 3, "by_severity": {"critical": 1, "high": 2}, "by_rule": {"brute_force": 3}, "by_status": {"open": 3}})
+                        {"total_alerts": 3, "by_severity": {"critical": 1, "high": 2}, "by_rule": {"brute_force": 3}, "by_status": {"open": 3}})
     report = generate(client)
     assert report["unavailable"] == []
     _, text = pdf_text(client.get(report["download_url"]).content)
@@ -104,7 +104,7 @@ def test_alert_summary_alone_still_fills_the_alert_counts(client, monkeypatch):
 
 def test_empty_period_still_produces_a_readable_pdf(client, monkeypatch):
     empty = {"stats": {"total_events": 0, "failed_logins": 0, "top_ips": [], "top_countries": [], "top_users": [], "by_hour": []},
-             "alerts": [], "alerts_summary": {"total": 0}, "scans": []}
+             "alerts": [], "alerts_summary": {"total_alerts": 0}, "scans": []}
     monkeypatch.setattr(generator, "collect", lambda *args: empty)
     report = generate(client)
     assert report["status"] == "completed" and report["unavailable"] == []
