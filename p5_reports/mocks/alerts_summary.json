@@ -1,0 +1,23 @@
+{
+  "total_alerts": 10,
+  "by_severity": {
+    "critical": 2,
+    "high": 5,
+    "medium": 2,
+    "low": 1
+  },
+  "by_rule": {
+    "brute_force": 2,
+    "success_after_failures": 2,
+    "injection_attempt": 2,
+    "password_spraying": 1,
+    "web_scan": 1,
+    "new_country": 1,
+    "off_hours_login": 1
+  },
+  "by_status": {
+    "open": 6,
+    "acknowledged": 2,
+    "resolved": 2
+  }
+}

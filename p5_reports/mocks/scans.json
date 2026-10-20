@@ -1,0 +1,84 @@
+{
+  "scans": [
+    {
+      "id": 1,
+      "domain": "acme-bank-verify.xyz",
+      "scanned_at": "2026-10-15T10:20:00Z",
+      "risk_score": 100,
+      "risk_level": "critical",
+      "whois": {"created": "2026-10-09", "age_days": 6, "registrar": "NameCheap, Inc.", "expires": "2027-10-09", "expires_days_left": 359},
+      "dns": {"a": ["203.0.113.140"], "mx": [], "ns": ["dns1.registrar-servers.com", "dns2.registrar-servers.com"], "spf": false, "dmarc": false},
+      "ssl": {"valid": true, "issuer": "Let's Encrypt", "expires": "2027-01-07", "days_left": 84},
+      "blacklist": {"virustotal": 7, "safebrowsing": "unsafe", "flagged_by": ["BitDefender", "ESET", "Fortinet", "Google Safebrowsing", "Kaspersky", "Sophos", "Webroot"]},
+      "reasons": [
+        "Flagged by multiple security engines as malicious",
+        "Domain is brand new: less than 30 days old",
+        "No SPF or DMARC email authentication configured (spoofing risk)",
+        "Hyphen-stuffed domain name: 2 hyphens in acme-bank-verify.xyz",
+        "Sensitive keywords in a suspicious context: bank, verify",
+        "High-risk domain ending: .xyz"
+      ]
+    },
+    {
+      "id": 2,
+      "domain": "update-account-portal.top",
+      "scanned_at": "2026-10-16T08:45:12Z",
+      "risk_score": 60,
+      "risk_level": "high",
+      "whois": {"created": "2026-09-05", "age_days": 41, "registrar": "Gname.com Pte. Ltd.", "expires": "2027-09-05", "expires_days_left": 324},
+      "dns": {"a": ["198.51.100.61"], "mx": [], "ns": ["ns1.gname-dns.com", "ns2.gname-dns.com"], "spf": false, "dmarc": false},
+      "ssl": {"valid": false, "issuer": null, "expires": null, "days_left": null, "error": "Self-signed certificate"},
+      "blacklist": {"virustotal": 1, "safebrowsing": "clean", "flagged_by": ["CRDF"]},
+      "reasons": [
+        "Missing, invalid, self-signed, or expired SSL certificate (Self-signed certificate)",
+        "Flagged by isolated vendor on VirusTotal",
+        "No SPF or DMARC email authentication configured (spoofing risk)",
+        "Domain is young: less than 90 days old"
+      ]
+    },
+    {
+      "id": 3,
+      "domain": "secure-docs-share.online",
+      "scanned_at": "2026-10-17T14:02:33Z",
+      "risk_score": 55,
+      "risk_level": "high",
+      "whois": {"created": "2025-03-14", "age_days": 582, "registrar": "Hostinger Operations, UAB", "expires": "2027-03-14", "expires_days_left": 148},
+      "dns": {"a": ["192.0.2.88"], "mx": ["mx1.hostinger.com"], "ns": ["ns1.dns-parking.com", "ns2.dns-parking.com"], "spf": true, "dmarc": false},
+      "ssl": {"valid": true, "issuer": "Google Trust Services", "expires": "2026-12-30", "days_left": 74},
+      "blacklist": {"virustotal": 0, "safebrowsing": "unsafe", "flagged_by": ["Google Safebrowsing"]},
+      "reasons": [
+        "Listed as unsafe by Google Safe Browsing",
+        "Sensitive keywords in a suspicious context: secure, docs"
+      ]
+    },
+    {
+      "id": 4,
+      "domain": "cdn-files-mirror.net",
+      "scanned_at": "2026-10-18T09:15:47Z",
+      "risk_score": 25,
+      "risk_level": "medium",
+      "whois": {"created": "2021-06-02", "age_days": 1964, "registrar": "GoDaddy.com, LLC", "expires": "2027-06-02", "expires_days_left": 227},
+      "dns": {"a": ["203.0.113.25"], "mx": ["mail.cdn-files-mirror.net"], "ns": ["ns51.domaincontrol.com", "ns52.domaincontrol.com"], "spf": false, "dmarc": false},
+      "ssl": {"valid": true, "issuer": "Sectigo Limited", "expires": "2027-02-11", "days_left": 116},
+      "blacklist": {"virustotal": 0, "safebrowsing": "clean", "flagged_by": []},
+      "reasons": [
+        "No SPF or DMARC email authentication configured (spoofing risk)",
+        "Hyphen-stuffed domain name: 2 hyphens in cdn-files-mirror.net"
+      ]
+    },
+    {
+      "id": 5,
+      "domain": "github.com",
+      "scanned_at": "2026-10-18T16:30:05Z",
+      "risk_score": 0,
+      "risk_level": "low",
+      "whois": {"created": "2007-10-09", "age_days": 6949, "registrar": "MarkMonitor, Inc.", "expires": "2027-10-09", "expires_days_left": 356},
+      "dns": {"a": ["140.82.121.4"], "mx": ["aspmx.l.google.com", "alt1.aspmx.l.google.com"], "ns": ["dns1.p08.nsone.net", "ns-1283.awsdns-32.org"], "spf": true, "dmarc": true},
+      "ssl": {"valid": true, "issuer": "Sectigo Limited", "expires": "2027-02-05", "days_left": 110},
+      "blacklist": {"virustotal": 0, "safebrowsing": "clean", "flagged_by": []},
+      "reasons": [
+        "Clean: Passed all security and reputation checks"
+      ]
+    }
+  ]
+}

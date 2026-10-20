@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Security Reports</title>
+  <!-- Standalone mode: the P4 shell imports ui/index.jsx itself; here React comes from a CDN -->
+  <script type="importmap">
+    { "imports": { "react": "https://esm.sh/react@18.3.1", "react-dom/client": "https://esm.sh/react-dom@18.3.1/client?deps=react@18.3.1" } }
+  </script>
+  <style>
+    body { margin: 0; background: #0e1621; }
+    main { max-width: 1100px; margin: 0 auto; padding: 32px 16px; }
+  </style>
+</head>
+<body>
+  <main id="root"></main>
+  <script type="module">
+    import { createElement } from "react";
+    import { createRoot } from "react-dom/client";
+    import ReportsPage from "/ui/index.jsx";
+
+    // Same origin as the API; a token can be passed as #token=... when AUTH_DISABLED=false
+    const token = new URLSearchParams(location.hash.slice(1)).get("token") || undefined;
+    createRoot(document.getElementById("root")).render(createElement(ReportsPage, { apiBase: "", token }));
+  </script>
+</body>
+</html>
