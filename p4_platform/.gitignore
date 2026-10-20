@@ -1,0 +1,6 @@
+platform.db
+__pycache__/
+.venv/
+ui/node_modules/
+node_modules/
+dist/
